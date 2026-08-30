@@ -1,3 +1,5 @@
+import { useCollapsible } from '../hooks/useCollapsible.js'
+
 const yen = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' })
 
 function monthKey(date) {
@@ -6,6 +8,8 @@ function monthKey(date) {
 }
 
 export default function MonthlyChart({ transactions }) {
+  const [open, toggle] = useCollapsible('manemane-section-monthly-chart', false)
+
   const now = new Date()
   const months = []
   for (let i = 5; i >= 0; i--) {
@@ -24,43 +28,63 @@ export default function MonthlyChart({ transactions }) {
 
   return (
     <section className="monthly-chart">
-      <h2>月ごとの収支</h2>
-      <svg
-        viewBox={`0 0 ${months.length * 60} ${chartHeight + 20}`}
-        className="chart-svg"
-        role="img"
-        aria-label="月ごとの収入と支出"
-      >
-        {months.map((m, i) => {
-          const income = totals[m.key].income
-          const expense = totals[m.key].expense
-          const incomeHeight = (income / maxValue) * chartHeight
-          const expenseHeight = (expense / maxValue) * chartHeight
-          const x = i * 60
-          return (
-            <g key={m.key}>
-              <title>
-                {m.label}：収入 {yen.format(income)} / 支出 {yen.format(expense)}
-              </title>
-              <rect x={x + 8} y={chartHeight - incomeHeight} width="16" height={incomeHeight} fill="#2f9e44" />
-              <rect x={x + 30} y={chartHeight - expenseHeight} width="16" height={expenseHeight} fill="#e03131" />
-              <text x={x + 30} y={chartHeight + 15} fontSize="10" textAnchor="middle" fill="#555">
-                {m.label}
-              </text>
-            </g>
-          )
-        })}
-      </svg>
-      <div className="chart-legend">
-        <span>
-          <i className="legend-dot income" />
-          収入
-        </span>
-        <span>
-          <i className="legend-dot expense" />
-          支出
-        </span>
-      </div>
+      <button type="button" className="section-toggle" onClick={toggle} aria-expanded={open}>
+        <h2>月ごとの収支</h2>
+        <span className={`section-chevron ${open ? 'open' : ''}`}>▾</span>
+      </button>
+
+      {open && (
+        <>
+          <svg
+            viewBox={`0 0 ${months.length * 60} ${chartHeight + 20}`}
+            className="chart-svg"
+            role="img"
+            aria-label="月ごとの収入と支出"
+          >
+            {months.map((m, i) => {
+              const income = totals[m.key].income
+              const expense = totals[m.key].expense
+              const incomeHeight = (income / maxValue) * chartHeight
+              const expenseHeight = (expense / maxValue) * chartHeight
+              const x = i * 60
+              return (
+                <g key={m.key}>
+                  <title>
+                    {m.label}：収入 {yen.format(income)} / 支出 {yen.format(expense)}
+                  </title>
+                  <rect
+                    x={x + 8}
+                    y={chartHeight - incomeHeight}
+                    width="16"
+                    height={incomeHeight}
+                    fill="#2f9e44"
+                  />
+                  <rect
+                    x={x + 30}
+                    y={chartHeight - expenseHeight}
+                    width="16"
+                    height={expenseHeight}
+                    fill="#e03131"
+                  />
+                  <text x={x + 30} y={chartHeight + 15} fontSize="10" textAnchor="middle" fill="#555">
+                    {m.label}
+                  </text>
+                </g>
+              )
+            })}
+          </svg>
+          <div className="chart-legend">
+            <span>
+              <i className="legend-dot income" />
+              収入
+            </span>
+            <span>
+              <i className="legend-dot expense" />
+              支出
+            </span>
+          </div>
+        </>
+      )}
     </section>
   )
 }

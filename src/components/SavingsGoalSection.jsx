@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { isBlank, REQUIRED_MESSAGE } from '../../lib/validation.js'
+import { useCollapsible } from '../hooks/useCollapsible.js'
 
 const yen = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' })
 
 export default function SavingsGoalSection({ transactions }) {
+  const [open, toggle] = useCollapsible('manemane-section-savings-goal', false)
   const [goal, setGoal] = useState(null)
   const [amount, setAmount] = useState('')
   const [error, setError] = useState(null)
@@ -66,43 +68,50 @@ export default function SavingsGoalSection({ transactions }) {
 
   return (
     <section className="savings-goal-section">
-      <h2>今月の貯金目標</h2>
+      <button type="button" className="section-toggle" onClick={toggle} aria-expanded={open}>
+        <h2>今月の貯金目標</h2>
+        <span className={`section-chevron ${open ? 'open' : ''}`}>▾</span>
+      </button>
 
-      {goal && (
-        <div className="savings-goal-progress">
-          <div className="savings-goal-numbers">
-            <span className={achieved ? 'positive' : ''}>{yen.format(saved)}</span>
-            <span className="savings-goal-target"> / {yen.format(goal.amount)}</span>
-          </div>
-          <div className="savings-goal-bar">
-            <div
-              className={`savings-goal-bar-fill ${achieved ? 'achieved' : ''}`}
-              style={{ width: `${ratio * 100}%` }}
-            />
-          </div>
-          {achieved && <p className="savings-goal-achieved">今月の目標を達成しました！</p>}
-          {monthlyNet < 0 && (
-            <p className="savings-goal-warning">今月は支出が収入を上回っています</p>
+      {open && (
+        <>
+          {goal && (
+            <div className="savings-goal-progress">
+              <div className="savings-goal-numbers">
+                <span className={achieved ? 'positive' : ''}>{yen.format(saved)}</span>
+                <span className="savings-goal-target"> / {yen.format(goal.amount)}</span>
+              </div>
+              <div className="savings-goal-bar">
+                <div
+                  className={`savings-goal-bar-fill ${achieved ? 'achieved' : ''}`}
+                  style={{ width: `${ratio * 100}%` }}
+                />
+              </div>
+              {achieved && <p className="savings-goal-achieved">今月の目標を達成しました！</p>}
+              {monthlyNet < 0 && (
+                <p className="savings-goal-warning">今月は支出が収入を上回っています</p>
+              )}
+            </div>
           )}
-        </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="savings-goal-form">
-        <label>
-          今月の目標額
-          <input
-            type="number"
-            min="1"
-            placeholder="10000"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-          {error && <span className="field-error">{error}</span>}
-        </label>
-        <button type="submit" disabled={submitting}>
-          {submitting ? '保存中…' : goal ? '目標を更新する' : '目標を設定する'}
-        </button>
-      </form>
+          <form onSubmit={handleSubmit} className="savings-goal-form">
+            <label>
+              今月の目標額
+              <input
+                type="number"
+                min="1"
+                placeholder="10000"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+              {error && <span className="field-error">{error}</span>}
+            </label>
+            <button type="submit" disabled={submitting}>
+              {submitting ? '保存中…' : goal ? '目標を更新する' : '目標を設定する'}
+            </button>
+          </form>
+        </>
+      )}
     </section>
   )
 }

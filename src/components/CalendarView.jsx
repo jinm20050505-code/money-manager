@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { dueDateInMonth, daysInMonth } from '../lib/dueDate.js'
+import { useCollapsible } from '../hooks/useCollapsible.js'
 
 const yen = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' })
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土']
@@ -12,6 +13,7 @@ function toDateKey(date) {
 }
 
 export default function CalendarView({ transactions, fixedPayments }) {
+  const [open, toggle] = useCollapsible('manemane-section-calendar', true)
   const [cursor, setCursor] = useState(() => {
     const now = new Date()
     return new Date(now.getFullYear(), now.getMonth(), 1)
@@ -47,53 +49,74 @@ export default function CalendarView({ transactions, fixedPayments }) {
 
   return (
     <section className="calendar-section">
-      <div className="calendar-header">
-        <button type="button" onClick={() => setCursor(new Date(year, month - 1, 1))} aria-label="前の月">
-          ‹
-        </button>
-        <h2>
-          {year}年{month + 1}月
-        </h2>
-        <button type="button" onClick={() => setCursor(new Date(year, month + 1, 1))} aria-label="次の月">
-          ›
-        </button>
-      </div>
+      <button type="button" className="section-toggle" onClick={toggle} aria-expanded={open}>
+        <h2>カレンダー</h2>
+        <span className={`section-chevron ${open ? 'open' : ''}`}>▾</span>
+      </button>
 
-      <div className="calendar-grid calendar-weekdays">
-        {WEEKDAYS.map((w) => (
-          <div key={w} className="calendar-weekday">
-            {w}
+      {open && (
+        <>
+          <div className="calendar-header">
+            <button
+              type="button"
+              onClick={() => setCursor(new Date(year, month - 1, 1))}
+              aria-label="前の月"
+            >
+              ‹
+            </button>
+            <span className="calendar-month-label">
+              {year}年{month + 1}月
+            </span>
+            <button
+              type="button"
+              onClick={() => setCursor(new Date(year, month + 1, 1))}
+              aria-label="次の月"
+            >
+              ›
+            </button>
           </div>
-        ))}
-      </div>
 
-      <div className="calendar-grid">
-        {cells.map((d, i) => {
-          if (d === null) return <div key={i} className="calendar-cell empty" />
+          <div className="calendar-grid calendar-weekdays">
+            {WEEKDAYS.map((w) => (
+              <div key={w} className="calendar-weekday">
+                {w}
+              </div>
+            ))}
+          </div>
 
-          const key = toDateKey(new Date(year, month, d))
-          const totals = dailyTotals[key]
-          const payments = paymentsByDay[key]
-          const isToday = isCurrentMonth && today.getDate() === d
+          <div className="calendar-grid">
+            {cells.map((d, i) => {
+              if (d === null) return <div key={i} className="calendar-cell empty" />
 
-          return (
-            <div key={i} className={`calendar-cell ${isToday ? 'today' : ''}`}>
-              <span className="calendar-day">{d}</span>
-              {totals?.income > 0 && <span className="calendar-income">+{yen.format(totals.income)}</span>}
-              {totals?.expense > 0 && <span className="calendar-expense">-{yen.format(totals.expense)}</span>}
-              {payments?.map((p) => (
-                <span
-                  key={p.id}
-                  className={`calendar-payment ${p.type === 'income' ? 'income' : ''}`}
-                >
-                  {p.type === 'income' ? '+' : ''}
-                  {p.name}
-                </span>
-              ))}
-            </div>
-          )
-        })}
-      </div>
+              const key = toDateKey(new Date(year, month, d))
+              const totals = dailyTotals[key]
+              const payments = paymentsByDay[key]
+              const isToday = isCurrentMonth && today.getDate() === d
+
+              return (
+                <div key={i} className={`calendar-cell ${isToday ? 'today' : ''}`}>
+                  <span className="calendar-day">{d}</span>
+                  {totals?.income > 0 && (
+                    <span className="calendar-income">+{yen.format(totals.income)}</span>
+                  )}
+                  {totals?.expense > 0 && (
+                    <span className="calendar-expense">-{yen.format(totals.expense)}</span>
+                  )}
+                  {payments?.map((p) => (
+                    <span
+                      key={p.id}
+                      className={`calendar-payment ${p.type === 'income' ? 'income' : ''}`}
+                    >
+                      {p.type === 'income' ? '+' : ''}
+                      {p.name}
+                    </span>
+                  ))}
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
     </section>
   )
 }

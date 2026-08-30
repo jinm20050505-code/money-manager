@@ -5,10 +5,12 @@ import {
   REQUIRED_MESSAGE,
   INVALID_CHAR_MESSAGE,
 } from '../../lib/validation.js'
+import { useCollapsible } from '../hooks/useCollapsible.js'
 
 const yen = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' })
 
 export default function BudgetSection({ transactions }) {
+  const [open, toggle] = useCollapsible('manemane-section-budget', false)
   const [budgets, setBudgets] = useState([])
   const [form, setForm] = useState({ category: '', limit: '' })
   const [errors, setErrors] = useState({})
@@ -78,67 +80,77 @@ export default function BudgetSection({ transactions }) {
 
   return (
     <section className="budget-section">
-      <h2>カテゴリ別の予算（今月）</h2>
+      <button type="button" className="section-toggle" onClick={toggle} aria-expanded={open}>
+        <h2>カテゴリ別の予算（今月）</h2>
+        <span className={`section-chevron ${open ? 'open' : ''}`}>▾</span>
+      </button>
 
-      {budgets.length > 0 && (
-        <ul className="budget-list">
-          {budgets.map((b) => {
-            const spent = thisMonthSpend[b.category] || 0
-            const ratio = Math.min(1, spent / b.limit)
-            const over = spent > b.limit
-            return (
-              <li key={b.category} className="budget-item">
-                <div className="budget-item-header">
-                  <span>{b.category}</span>
-                  <span className={over ? 'negative' : ''}>
-                    {yen.format(spent)} / {yen.format(b.limit)}
-                  </span>
-                  <button
-                    type="button"
-                    className="delete-button"
-                    onClick={() => handleDelete(b.category)}
-                    aria-label="削除"
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className="budget-bar">
-                  <div className={`budget-bar-fill ${over ? 'over' : ''}`} style={{ width: `${ratio * 100}%` }} />
-                </div>
-              </li>
-            )
-          })}
-        </ul>
+      {open && (
+        <>
+          {budgets.length > 0 && (
+            <ul className="budget-list">
+              {budgets.map((b) => {
+                const spent = thisMonthSpend[b.category] || 0
+                const ratio = Math.min(1, spent / b.limit)
+                const over = spent > b.limit
+                return (
+                  <li key={b.category} className="budget-item">
+                    <div className="budget-item-header">
+                      <span>{b.category}</span>
+                      <span className={over ? 'negative' : ''}>
+                        {yen.format(spent)} / {yen.format(b.limit)}
+                      </span>
+                      <button
+                        type="button"
+                        className="delete-button"
+                        onClick={() => handleDelete(b.category)}
+                        aria-label="削除"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <div className="budget-bar">
+                      <div
+                        className={`budget-bar-fill ${over ? 'over' : ''}`}
+                        style={{ width: `${ratio * 100}%` }}
+                      />
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+
+          <form onSubmit={handleSubmit} className="budget-form">
+            <label>
+              カテゴリ
+              <input
+                type="text"
+                placeholder="例：食費"
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+              />
+              {errors.category && <span className="field-error">{errors.category}</span>}
+            </label>
+
+            <label>
+              上限額（月）
+              <input
+                type="number"
+                min="1"
+                placeholder="20000"
+                value={form.limit}
+                onChange={(e) => setForm({ ...form, limit: e.target.value })}
+              />
+              {errors.limit && <span className="field-error">{errors.limit}</span>}
+            </label>
+
+            <button type="submit" disabled={submitting}>
+              {submitting ? '保存中…' : '設定する'}
+            </button>
+          </form>
+        </>
       )}
-
-      <form onSubmit={handleSubmit} className="budget-form">
-        <label>
-          カテゴリ
-          <input
-            type="text"
-            placeholder="例：食費"
-            value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
-          />
-          {errors.category && <span className="field-error">{errors.category}</span>}
-        </label>
-
-        <label>
-          上限額（月）
-          <input
-            type="number"
-            min="1"
-            placeholder="20000"
-            value={form.limit}
-            onChange={(e) => setForm({ ...form, limit: e.target.value })}
-          />
-          {errors.limit && <span className="field-error">{errors.limit}</span>}
-        </label>
-
-        <button type="submit" disabled={submitting}>
-          {submitting ? '保存中…' : '設定する'}
-        </button>
-      </form>
     </section>
   )
 }

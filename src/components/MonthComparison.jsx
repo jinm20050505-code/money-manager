@@ -1,3 +1,5 @@
+import { useCollapsible } from '../hooks/useCollapsible.js'
+
 const yen = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' })
 
 function monthKey(date) {
@@ -12,6 +14,7 @@ function diffLabel(diff) {
 }
 
 export default function MonthComparison({ transactions }) {
+  const [open, toggle] = useCollapsible('manemane-section-month-comparison', false)
   const now = new Date()
   const thisKey = monthKey(now)
   const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
@@ -42,41 +45,54 @@ export default function MonthComparison({ transactions }) {
 
   return (
     <section className="month-comparison">
-      <h2>先月との比較</h2>
+      <button type="button" className="section-toggle" onClick={toggle} aria-expanded={open}>
+        <h2>先月との比較</h2>
+        <span className={`section-chevron ${open ? 'open' : ''}`}>▾</span>
+      </button>
 
-      <div className="comparison-row">
-        <span className="comparison-label">支出</span>
-        <span className="comparison-value">{yen.format(thisMonth.expense)}</span>
-        <span className={expenseDiff > 0 ? 'comparison-diff negative' : 'comparison-diff positive'}>
-          {diffLabel(expenseDiff)}
-        </span>
-      </div>
+      {open && (
+        <>
+          <div className="comparison-row">
+            <span className="comparison-label">支出</span>
+            <span className="comparison-value">{yen.format(thisMonth.expense)}</span>
+            <span
+              className={expenseDiff > 0 ? 'comparison-diff negative' : 'comparison-diff positive'}
+            >
+              {diffLabel(expenseDiff)}
+            </span>
+          </div>
 
-      <div className="comparison-row">
-        <span className="comparison-label">収入</span>
-        <span className="comparison-value">{yen.format(thisMonth.income)}</span>
-        <span className={incomeDiff < 0 ? 'comparison-diff negative' : 'comparison-diff positive'}>
-          {diffLabel(incomeDiff)}
-        </span>
-      </div>
+          <div className="comparison-row">
+            <span className="comparison-label">収入</span>
+            <span className="comparison-value">{yen.format(thisMonth.income)}</span>
+            <span
+              className={incomeDiff < 0 ? 'comparison-diff negative' : 'comparison-diff positive'}
+            >
+              {diffLabel(incomeDiff)}
+            </span>
+          </div>
 
-      {categories.length > 0 && (
-        <ul className="comparison-categories">
-          {categories.map((c) => {
-            const cur = thisMonth.categories[c] || 0
-            const prev = lastMonth.categories[c] || 0
-            const diff = cur - prev
-            return (
-              <li key={c}>
-                <span className="comparison-label">{c}</span>
-                <span className="comparison-value">{yen.format(cur)}</span>
-                <span className={diff > 0 ? 'comparison-diff negative' : 'comparison-diff positive'}>
-                  {diffLabel(diff)}
-                </span>
-              </li>
-            )
-          })}
-        </ul>
+          {categories.length > 0 && (
+            <ul className="comparison-categories">
+              {categories.map((c) => {
+                const cur = thisMonth.categories[c] || 0
+                const prev = lastMonth.categories[c] || 0
+                const diff = cur - prev
+                return (
+                  <li key={c}>
+                    <span className="comparison-label">{c}</span>
+                    <span className="comparison-value">{yen.format(cur)}</span>
+                    <span
+                      className={diff > 0 ? 'comparison-diff negative' : 'comparison-diff positive'}
+                    >
+                      {diffLabel(diff)}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </>
       )}
     </section>
   )
