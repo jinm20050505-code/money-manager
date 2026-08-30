@@ -1,0 +1,998 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans',
+    'Noto Sans JP', sans-serif;
+  background: #f4f5f7;
+  color: #1a1a1a;
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.app-header {
+  text-align: center;
+  margin: 20px 0 24px;
+}
+
+.app-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin: 0;
+  background: linear-gradient(135deg, #1a1a2e, #4263eb);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.app-subtitle {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #888;
+}
+
+.app-tagline {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  background: #eceef1;
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 16px;
+  position: sticky;
+  top: 8px;
+  z-index: 10;
+}
+
+.tab-button {
+  flex: 1;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 4px;
+  font-size: 0.78rem;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab-button.active {
+  background: #fff;
+  color: #1a1a2e;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.balance-card {
+  background: #1a1a2e;
+  color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.balance-label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.balance-amount {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.balance-amount.negative {
+  color: #ff6b6b;
+}
+
+.daily-allowance {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.daily-allowance-label {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.daily-allowance-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2f9e44;
+}
+
+.daily-allowance-amount.negative {
+  color: #e03131;
+}
+
+.daily-allowance-warning {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  color: #e03131;
+}
+
+.daily-allowance-note {
+  font-size: 0.7rem;
+  color: #888;
+}
+
+.error {
+  background: #ffe3e3;
+  color: #c92a2a;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.about-section,
+.share-section,
+.fixed-payment-section,
+.monthly-chart,
+.budget-section,
+.notification-section,
+.loan-section,
+.month-comparison,
+.credit-card-section,
+.savings-goal-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.about-section h2,
+.share-section h2,
+.fixed-payment-section h2,
+.monthly-chart h2,
+.budget-section h2,
+.notification-section h2,
+.loan-section h2,
+.month-comparison h2,
+.credit-card-section h2,
+.savings-goal-section h2 {
+  font-size: 1.1rem;
+  margin: 0 0 8px;
+}
+
+.about-section p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.share-hint {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.share-section button {
+  background: #1a1a2e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.share-section button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.share-url-row {
+  display: flex;
+  gap: 8px;
+}
+
+.share-url-row input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  min-width: 0;
+}
+
+.shared-note {
+  background: #eef1ff;
+  color: #364fc7;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.transaction-form,
+.profile-form,
+.quick-presets {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.quick-presets-hint {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.quick-preset-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quick-preset {
+  border: 1px solid #ddd;
+  background: #f8f9fa;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #1a1a1a;
+}
+
+.quick-preset.income {
+  border-color: #b2f2bb;
+  background: #ebfbee;
+  color: #2f9e44;
+}
+
+.quick-preset.expense {
+  border-color: #ffc9c9;
+  background: #fff5f5;
+  color: #c92a2a;
+}
+
+.quick-message {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: #2f9e44;
+}
+
+.profile-form h2 {
+  font-size: 1.1rem;
+  margin: 0 0 12px;
+}
+
+.transaction-form,
+.fixed-payment-form,
+.budget-form,
+.loan-form,
+.credit-card-form,
+.transaction-edit-form,
+.savings-goal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field-group {
+  display: flex;
+  gap: 10px;
+}
+
+.checkbox-label {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 6px !important;
+}
+
+.checkbox-label input[type='checkbox'] {
+  width: auto;
+}
+
+.transaction-form label,
+.profile-form label,
+.fixed-payment-form label,
+.budget-form label,
+.loan-form label,
+.credit-card-form label,
+.transaction-edit-form label,
+.savings-goal-form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+  color: #555;
+  gap: 4px;
+  flex: 1;
+}
+
+.transaction-form select,
+.transaction-form input,
+.profile-form input,
+.fixed-payment-form select,
+.fixed-payment-form input,
+.budget-form input,
+.loan-form select,
+.loan-form input,
+.credit-card-form input,
+.transaction-edit-form select,
+.transaction-edit-form input,
+.savings-goal-form input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.transaction-form button,
+.profile-form button,
+.fixed-payment-form button,
+.budget-form button,
+.notification-section button,
+.loan-form button,
+.credit-card-form button,
+.savings-goal-form button {
+  background: #1a1a2e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.transaction-form button:disabled,
+.profile-form button:disabled,
+.fixed-payment-form button:disabled,
+.budget-form button:disabled,
+.loan-form button:disabled,
+.credit-card-form button:disabled,
+.savings-goal-form button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.field-error {
+  color: #c92a2a;
+  font-size: 0.75rem;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #4263eb;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.category-summary {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.category-summary li {
+  display: flex;
+  justify-content: space-between;
+  color: #555;
+}
+
+.category-summary .negative {
+  color: #e03131;
+}
+
+.transaction-category {
+  color: #4263eb;
+}
+
+.transaction-list h2 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.transaction-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.transaction-item {
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  border-left: 4px solid #ccc;
+}
+
+.transaction-item.income {
+  border-left-color: #2f9e44;
+}
+
+.transaction-item.expense {
+  border-left-color: #e03131;
+}
+
+.transaction-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.transaction-date {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.transaction-memo {
+  font-size: 0.95rem;
+  overflow-wrap: break-word;
+}
+
+.transaction-amount {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.transaction-item.income .transaction-amount {
+  color: #2f9e44;
+}
+
+.transaction-item.expense .transaction-amount {
+  color: #e03131;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+}
+
+.delete-button:hover {
+  color: #e03131;
+}
+
+.edit-button {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  color: #555;
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.edit-button:hover {
+  border-color: #4263eb;
+  color: #4263eb;
+}
+
+.transaction-item.editing {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  display: block;
+}
+
+.transaction-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.transaction-edit-actions button {
+  flex: 1;
+  padding: 10px;
+}
+
+.cancel-button {
+  background: #f1f3f5 !important;
+  color: #555 !important;
+}
+
+.empty {
+  color: #888;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.payment-alert {
+  background: #fff5f5;
+  border: 1px solid #ffc9c9;
+  color: #c92a2a;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+}
+
+.payment-alert ul {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+
+.payment-alert p {
+  margin: 0;
+}
+
+.fixed-payment-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fixed-payment-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+}
+
+.fixed-payment-day {
+  color: #888;
+  white-space: nowrap;
+}
+
+.fixed-payment-name {
+  flex: 1;
+}
+
+.fixed-payment-amount {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.chart-svg {
+  width: 100%;
+  height: auto;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 0.8rem;
+  color: #555;
+  margin-top: 8px;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.legend-dot.income {
+  background: #2f9e44;
+}
+
+.legend-dot.expense {
+  background: #e03131;
+}
+
+.budget-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.budget-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.budget-item-header span:first-child {
+  flex: 1;
+  font-weight: 600;
+}
+
+.budget-bar {
+  background: #f1f3f5;
+  border-radius: 6px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.budget-bar-fill {
+  height: 100%;
+  background: #2f9e44;
+}
+
+.budget-bar-fill.over {
+  background: #e03131;
+}
+
+.calendar-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.calendar-header h2 {
+  font-size: 1rem;
+  margin: 0;
+  min-width: 8em;
+  text-align: center;
+}
+
+.calendar-header button {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #333;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calendar-weekdays {
+  margin-bottom: 4px;
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-size: 0.7rem;
+  color: #888;
+  padding: 2px 0;
+}
+
+.calendar-cell {
+  min-height: 56px;
+  border-radius: 6px;
+  background: #f8f9fa;
+  padding: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 0.6rem;
+  overflow: hidden;
+}
+
+.calendar-cell.empty {
+  background: transparent;
+}
+
+.calendar-cell.today {
+  outline: 2px solid #1a1a2e;
+  outline-offset: -2px;
+}
+
+.calendar-day {
+  font-size: 0.7rem;
+  color: #555;
+  font-weight: 600;
+}
+
+.calendar-income {
+  color: #2f9e44;
+}
+
+.calendar-expense {
+  color: #e03131;
+}
+
+.calendar-payment {
+  color: #4263eb;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.loan-outstanding {
+  background: #fff5f5;
+  color: #c92a2a;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin: 0 0 12px;
+}
+
+.loan-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.loan-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+}
+
+.loan-item.repaid {
+  opacity: 0.5;
+}
+
+.loan-item.repaid .loan-lender,
+.loan-item.repaid .loan-amount {
+  text-decoration: line-through;
+}
+
+.loan-checkbox {
+  width: auto;
+}
+
+.loan-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.loan-lender {
+  font-weight: 600;
+}
+
+.loan-due {
+  font-size: 0.7rem;
+  color: #888;
+}
+
+.loan-plan {
+  font-size: 0.7rem;
+  color: #4263eb;
+}
+
+.loan-pay-button {
+  background: #ebfbee;
+  color: #2f9e44;
+  border: 1px solid #b2f2bb;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.loan-amount {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.comparison-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  padding: 6px 0;
+}
+
+.comparison-categories {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  border-top: 1px solid #f1f3f5;
+}
+
+.comparison-categories li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  padding: 6px 0;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.comparison-label {
+  flex: 1;
+  color: #555;
+}
+
+.comparison-value {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.comparison-diff {
+  font-size: 0.75rem;
+  white-space: nowrap;
+  min-width: 5.5em;
+  text-align: right;
+}
+
+.comparison-diff.negative {
+  color: #e03131;
+}
+
+.comparison-diff.positive {
+  color: #2f9e44;
+}
+
+.fixed-payment-list li.income {
+  border-left: 3px solid #2f9e44;
+  padding-left: 7px;
+}
+
+.fixed-payment-list li.income .fixed-payment-amount {
+  color: #2f9e44;
+}
+
+.calendar-payment.income {
+  color: #2f9e44;
+}
+
+.payment-alert li.income {
+  color: #2f9e44;
+}
+
+.payment-alert li.expense {
+  color: #c92a2a;
+}
+
+.transaction-credit-badge {
+  margin-left: 6px;
+  background: #eef1ff;
+  color: #4263eb;
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 0.65rem;
+}
+
+.credit-card-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.credit-card-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.credit-card-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.credit-card-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.credit-card-detail {
+  font-size: 0.7rem;
+  color: #888;
+}
+
+.savings-goal-progress {
+  margin-bottom: 16px;
+}
+
+.savings-goal-numbers {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.savings-goal-numbers .positive {
+  color: #2f9e44;
+}
+
+.savings-goal-target {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #888;
+}
+
+.savings-goal-bar {
+  background: #f1f3f5;
+  border-radius: 6px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.savings-goal-bar-fill {
+  height: 100%;
+  background: #4263eb;
+}
+
+.savings-goal-bar-fill.achieved {
+  background: #2f9e44;
+}
+
+.savings-goal-achieved {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: #2f9e44;
+}
+
+.savings-goal-warning {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: #e03131;
+}

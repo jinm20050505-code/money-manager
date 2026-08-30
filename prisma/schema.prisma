@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Transaction {
+  id            Int         @id @default(autoincrement())
+  type          String
+  amount        Int
+  category      String?
+  memo          String?
+  date          DateTime    @default(now())
+  paymentMethod String      @default("cash")
+  creditCardId  Int?
+  creditCard    CreditCard? @relation(fields: [creditCardId], references: [id], onDelete: SetNull)
+  createdAt     DateTime    @default(now())
+}
+
+model CreditCard {
+  id           Int           @id @default(autoincrement())
+  name         String
+  paymentDay   Int
+  createdAt    DateTime      @default(now())
+  transactions Transaction[]
+}
+
+model Profile {
+  id         Int      @id @default(autoincrement())
+  name       String
+  age        Int
+  occupation String
+  shareToken String?  @unique
+  updatedAt  DateTime @updatedAt
+}
+
+model FixedPayment {
+  id         Int      @id @default(autoincrement())
+  name       String
+  amount     Int
+  type       String   @default("expense")
+  dueDay     Int?
+  endOfMonth Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model Budget {
+  id       Int    @id @default(autoincrement())
+  category String @unique
+  limit    Int
+}
+
+model SavingsGoal {
+  id        Int      @id @default(autoincrement())
+  amount    Int
+  updatedAt DateTime @updatedAt
+}
+
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
+
+model Loan {
+  id                 Int           @id @default(autoincrement())
+  amount             Int
+  lender             String
+  dueDate            DateTime?
+  repaid             Boolean       @default(false)
+  repaymentFrequency String?
+  repaymentAmount    Int?
+  memo               String?
+  createdAt          DateTime      @default(now())
+  payments           LoanPayment[]
+}
+
+model LoanPayment {
+  id        Int      @id @default(autoincrement())
+  loanId    Int
+  amount    Int
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  loan      Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
+}
