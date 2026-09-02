@@ -12,6 +12,7 @@ import MonthlyChart from './components/MonthlyChart.jsx'
 import NotificationSettings from './components/NotificationSettings.jsx'
 import PaymentAlert from './components/PaymentAlert.jsx'
 import ProfileForm from './components/ProfileForm.jsx'
+import ProfileSetupScreen from './components/ProfileSetupScreen.jsx'
 import SavingsGoalSection from './components/SavingsGoalSection.jsx'
 import ShareSection from './components/ShareSection.jsx'
 import SharedView from './components/SharedView.jsx'
@@ -33,6 +34,8 @@ export default function App() {
 
   const [authChecked, setAuthChecked] = useState(false)
   const [user, setUser] = useState(null)
+  const [profileChecked, setProfileChecked] = useState(false)
+  const [profile, setProfile] = useState(null)
   const [tab, setTab] = useState('home')
   const [transactions, setTransactions] = useState([])
   const [fixedPayments, setFixedPayments] = useState([])
@@ -64,8 +67,20 @@ export default function App() {
     loadFixedPayments()
     loadLoans()
     loadCreditCards()
+    loadProfile()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  async function loadProfile() {
+    try {
+      const res = await fetch('/api/profile')
+      if (res.ok) setProfile(await res.json())
+    } catch {
+      // 取得失敗時はプロフィール設定を促す画面になる
+    } finally {
+      setProfileChecked(true)
+    }
+  }
 
   async function loadTransactions() {
     setLoading(true)
@@ -122,6 +137,8 @@ export default function App() {
   async function handleLogout() {
     await fetch('/api/auth?action=logout', { method: 'POST' })
     setUser(null)
+    setProfile(null)
+    setProfileChecked(false)
     setTransactions([])
     setFixedPayments([])
     setLoans([])
@@ -139,6 +156,14 @@ export default function App() {
 
   if (!user) {
     return <AuthScreen onAuthenticated={setUser} />
+  }
+
+  if (!profileChecked) {
+    return <div className="app" />
+  }
+
+  if (!profile) {
+    return <ProfileSetupScreen onCompleted={setProfile} />
   }
 
   const balance = calculateBalance(transactions, creditCards)

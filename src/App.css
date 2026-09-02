@@ -202,6 +202,15 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+.auth-card h2 {
+  font-size: 1.1rem;
+  margin: 0 0 6px;
+}
+
+.auth-card > .share-hint {
+  margin-bottom: 16px;
+}
+
 .auth-tabs {
   display: flex;
   gap: 4px;
