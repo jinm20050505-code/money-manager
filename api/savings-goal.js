@@ -1,9 +1,13 @@
 import { prisma } from '../lib/prisma.js'
+import { getUserId } from '../lib/auth.js'
 import { isBlank, REQUIRED_MESSAGE } from '../lib/validation.js'
 
 export default async function handler(req, res) {
+  const userId = getUserId(req)
+  if (!userId) return res.status(401).json({ error: '認証が必要です' })
+
   if (req.method === 'GET') {
-    const goal = await prisma.savingsGoal.findFirst()
+    const goal = await prisma.savingsGoal.findUnique({ where: { userId } })
     return res.status(200).json(goal)
   }
 
@@ -21,11 +25,12 @@ export default async function handler(req, res) {
     }
 
     const data = { amount: Math.round(Number(amount)) }
-    const existing = await prisma.savingsGoal.findFirst()
 
-    const goal = existing
-      ? await prisma.savingsGoal.update({ where: { id: existing.id }, data })
-      : await prisma.savingsGoal.create({ data })
+    const goal = await prisma.savingsGoal.upsert({
+      where: { userId },
+      update: data,
+      create: { userId, ...data },
+    })
 
     return res.status(200).json(goal)
   }

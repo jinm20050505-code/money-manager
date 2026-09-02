@@ -15,6 +15,7 @@ const routes = [
   { pattern: '/api/push/subscribe', handlerPath: '../api/push/subscribe.js' },
   { pattern: '/api/savings-goal', handlerPath: '../api/savings-goal.js' },
   { pattern: '/api/cron/reminder', handlerPath: '../api/cron/reminder.js' },
+  { pattern: '/api/auth', handlerPath: '../api/auth.js' },
 ]
 
 const server = http.createServer(async (req, res) => {
@@ -43,7 +44,7 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
-    const mockReq = { method: req.method, query: search, body }
+    const mockReq = { method: req.method, query: search, body, headers: req.headers }
     const mockRes = {
       statusCode: 200,
       _headers: {},

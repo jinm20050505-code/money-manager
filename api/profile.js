@@ -1,9 +1,13 @@
 import { prisma } from '../lib/prisma.js'
+import { getUserId } from '../lib/auth.js'
 import { isBlank, hasInvalidChars, REQUIRED_MESSAGE, INVALID_CHAR_MESSAGE } from '../lib/validation.js'
 
 export default async function handler(req, res) {
+  const userId = getUserId(req)
+  if (!userId) return res.status(401).json({ error: '認証が必要です' })
+
   if (req.method === 'GET') {
-    const profile = await prisma.profile.findFirst()
+    const profile = await prisma.profile.findUnique({ where: { userId } })
     return res.status(200).json(profile)
   }
 
@@ -25,11 +29,12 @@ export default async function handler(req, res) {
     }
 
     const data = { name, age: Math.round(Number(age)), occupation }
-    const existing = await prisma.profile.findFirst()
 
-    const profile = existing
-      ? await prisma.profile.update({ where: { id: existing.id }, data })
-      : await prisma.profile.create({ data })
+    const profile = await prisma.profile.upsert({
+      where: { userId },
+      update: data,
+      create: { userId, ...data },
+    })
 
     return res.status(200).json(profile)
   }

@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
 import { prisma } from '../lib/prisma.js'
+import { getUserId } from '../lib/auth.js'
 
 export default async function handler(req, res) {
   const { token } = req.query
@@ -10,7 +11,10 @@ export default async function handler(req, res) {
       return res.status(405).end(`Method ${req.method} Not Allowed`)
     }
 
-    let profile = await prisma.profile.findFirst()
+    const userId = getUserId(req)
+    if (!userId) return res.status(401).json({ error: '認証が必要です' })
+
+    let profile = await prisma.profile.findUnique({ where: { userId } })
     if (!profile) {
       return res.status(400).json({ error: '共有する前にプロフィールを登録してください' })
     }
@@ -35,7 +39,7 @@ export default async function handler(req, res) {
     return res.status(404).json({ error: 'この共有リンクは無効です' })
   }
 
-  const transactions = await prisma.transaction.findMany({ orderBy: { date: 'desc' } })
+  const transactions = await prisma.transaction.findMany({ where: { userId: profile.userId } })
 
   const balance = transactions.reduce(
     (sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount),

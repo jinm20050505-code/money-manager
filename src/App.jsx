@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import AboutSection from './components/AboutSection.jsx'
+import AuthScreen from './components/AuthScreen.jsx'
 import BudgetSection from './components/BudgetSection.jsx'
 import CalendarView from './components/CalendarView.jsx'
 import CreditCardSection from './components/CreditCardSection.jsx'
@@ -30,6 +31,8 @@ const TABS = [
 export default function App() {
   const shareToken = new URLSearchParams(window.location.search).get('share')
 
+  const [authChecked, setAuthChecked] = useState(false)
+  const [user, setUser] = useState(null)
   const [tab, setTab] = useState('home')
   const [transactions, setTransactions] = useState([])
   const [fixedPayments, setFixedPayments] = useState([])
@@ -40,12 +43,29 @@ export default function App() {
 
   useEffect(() => {
     if (shareToken) return
+
+    fetch('/api/auth?action=me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setUser(data))
+      .catch(() => setUser(null))
+      .finally(() => setAuthChecked(true))
+
+    function handleUnauthorized() {
+      setUser(null)
+    }
+    window.addEventListener('auth:unauthorized', handleUnauthorized)
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (shareToken || !user) return
     loadTransactions()
     loadFixedPayments()
     loadLoans()
     loadCreditCards()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [user])
 
   async function loadTransactions() {
     setLoading(true)
@@ -99,8 +119,26 @@ export default function App() {
     }
   }
 
+  async function handleLogout() {
+    await fetch('/api/auth?action=logout', { method: 'POST' })
+    setUser(null)
+    setTransactions([])
+    setFixedPayments([])
+    setLoans([])
+    setCreditCards([])
+    setTab('home')
+  }
+
   if (shareToken) {
     return <SharedView token={shareToken} />
+  }
+
+  if (!authChecked) {
+    return <div className="app" />
+  }
+
+  if (!user) {
+    return <AuthScreen onAuthenticated={setUser} />
   }
 
   const balance = calculateBalance(transactions, creditCards)
@@ -180,6 +218,14 @@ export default function App() {
           <ProfileForm />
           <NotificationSettings />
           <ShareSection />
+
+          <section className="account-section">
+            <h2>アカウント</h2>
+            <p className="share-hint">{user.email} でログイン中</p>
+            <button type="button" className="logout-button" onClick={handleLogout}>
+              ログアウト
+            </button>
+          </section>
         </>
       )}
     </div>

@@ -1,12 +1,19 @@
 import { prisma } from '../lib/prisma.js'
+import { getUserId } from '../lib/auth.js'
 import { isBlank, hasInvalidChars, REQUIRED_MESSAGE, INVALID_CHAR_MESSAGE } from '../lib/validation.js'
 
 export default async function handler(req, res) {
+  const userId = getUserId(req)
+  if (!userId) return res.status(401).json({ error: '認証が必要です' })
+
   const { category } = req.query
 
   if (category === undefined) {
     if (req.method === 'GET') {
-      const budgets = await prisma.budget.findMany({ orderBy: { category: 'asc' } })
+      const budgets = await prisma.budget.findMany({
+        where: { userId },
+        orderBy: { category: 'asc' },
+      })
       return res.status(200).json(budgets)
     }
 
@@ -27,9 +34,9 @@ export default async function handler(req, res) {
       }
 
       const budget = await prisma.budget.upsert({
-        where: { category: newCategory },
+        where: { userId_category: { userId, category: newCategory } },
         update: { limit: Math.round(Number(limit)) },
-        create: { category: newCategory, limit: Math.round(Number(limit)) },
+        create: { userId, category: newCategory, limit: Math.round(Number(limit)) },
       })
       return res.status(200).json(budget)
     }
@@ -43,13 +50,9 @@ export default async function handler(req, res) {
     return res.status(405).end(`Method ${req.method} Not Allowed`)
   }
 
-  try {
-    await prisma.budget.delete({ where: { category } })
-    return res.status(204).end()
-  } catch (err) {
-    if (err.code === 'P2025') {
-      return res.status(404).json({ error: '予算が見つかりません' })
-    }
-    throw err
+  const result = await prisma.budget.deleteMany({ where: { userId, category } })
+  if (result.count === 0) {
+    return res.status(404).json({ error: '予算が見つかりません' })
   }
+  return res.status(204).end()
 }

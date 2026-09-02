@@ -1,14 +1,19 @@
 import { prisma } from '../lib/prisma.js'
+import { getUserId } from '../lib/auth.js'
 import { isBlank, hasInvalidChars, REQUIRED_MESSAGE, INVALID_CHAR_MESSAGE } from '../lib/validation.js'
 
 const VALID_FREQUENCIES = ['daily', 'weekly', 'monthly']
 
 export default async function handler(req, res) {
+  const userId = getUserId(req)
+  if (!userId) return res.status(401).json({ error: '認証が必要です' })
+
   const { id, resource } = req.query
 
   if (id === undefined) {
     if (req.method === 'GET') {
       const loans = await prisma.loan.findMany({
+        where: { userId },
         include: { payments: true },
         orderBy: { createdAt: 'desc' },
       })
@@ -46,6 +51,7 @@ export default async function handler(req, res) {
 
       const loan = await prisma.loan.create({
         data: {
+          userId,
           amount: Math.round(Number(amount)),
           lender,
           dueDate: !hasPlan && dueDate ? new Date(dueDate) : null,
@@ -68,6 +74,11 @@ export default async function handler(req, res) {
   }
 
   if (resource === 'payments') {
+    const loan = await prisma.loan.findFirst({ where: { id: loanId, userId } })
+    if (!loan) {
+      return res.status(404).json({ error: '借入記録が見つかりません' })
+    }
+
     if (req.method === 'GET') {
       const payments = await prisma.loanPayment.findMany({
         where: { loanId },
@@ -77,11 +88,6 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const loan = await prisma.loan.findUnique({ where: { id: loanId } })
-      if (!loan) {
-        return res.status(404).json({ error: '借入記録が見つかりません' })
-      }
-
       const { amount } = req.body ?? {}
       const resolvedAmount = isBlank(amount) ? loan.repaymentAmount : Number(amount)
 
@@ -101,27 +107,23 @@ export default async function handler(req, res) {
 
   if (req.method === 'PATCH') {
     const { repaid } = req.body ?? {}
-    try {
-      const loan = await prisma.loan.update({ where: { id: loanId }, data: { repaid: !!repaid } })
-      return res.status(200).json(loan)
-    } catch (err) {
-      if (err.code === 'P2025') {
-        return res.status(404).json({ error: '借入記録が見つかりません' })
-      }
-      throw err
+    const result = await prisma.loan.updateMany({
+      where: { id: loanId, userId },
+      data: { repaid: !!repaid },
+    })
+    if (result.count === 0) {
+      return res.status(404).json({ error: '借入記録が見つかりません' })
     }
+    const loan = await prisma.loan.findUnique({ where: { id: loanId } })
+    return res.status(200).json(loan)
   }
 
   if (req.method === 'DELETE') {
-    try {
-      await prisma.loan.delete({ where: { id: loanId } })
-      return res.status(204).end()
-    } catch (err) {
-      if (err.code === 'P2025') {
-        return res.status(404).json({ error: '借入記録が見つかりません' })
-      }
-      throw err
+    const result = await prisma.loan.deleteMany({ where: { id: loanId, userId } })
+    if (result.count === 0) {
+      return res.status(404).json({ error: '借入記録が見つかりません' })
     }
+    return res.status(204).end()
   }
 
   res.setHeader('Allow', ['PATCH', 'DELETE'])

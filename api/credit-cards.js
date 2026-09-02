@@ -1,12 +1,19 @@
 import { prisma } from '../lib/prisma.js'
+import { getUserId } from '../lib/auth.js'
 import { isBlank, hasInvalidChars, REQUIRED_MESSAGE, INVALID_CHAR_MESSAGE } from '../lib/validation.js'
 
 export default async function handler(req, res) {
+  const userId = getUserId(req)
+  if (!userId) return res.status(401).json({ error: '認証が必要です' })
+
   const { id } = req.query
 
   if (id === undefined) {
     if (req.method === 'GET') {
-      const cards = await prisma.creditCard.findMany({ orderBy: { createdAt: 'asc' } })
+      const cards = await prisma.creditCard.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'asc' },
+      })
       return res.status(200).json(cards)
     }
 
@@ -27,7 +34,7 @@ export default async function handler(req, res) {
       }
 
       const card = await prisma.creditCard.create({
-        data: { name, paymentDay: Number(paymentDay) },
+        data: { userId, name, paymentDay: Number(paymentDay) },
       })
       return res.status(201).json(card)
     }
@@ -42,15 +49,11 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'DELETE') {
-    try {
-      await prisma.creditCard.delete({ where: { id: cardId } })
-      return res.status(204).end()
-    } catch (err) {
-      if (err.code === 'P2025') {
-        return res.status(404).json({ error: 'カードが見つかりません' })
-      }
-      throw err
+    const result = await prisma.creditCard.deleteMany({ where: { id: cardId, userId } })
+    if (result.count === 0) {
+      return res.status(404).json({ error: 'カードが見つかりません' })
     }
+    return res.status(204).end()
   }
 
   res.setHeader('Allow', ['DELETE'])

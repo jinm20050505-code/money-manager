@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma.js'
+import { getUserId } from '../lib/auth.js'
 import { isBlank, hasInvalidChars, REQUIRED_MESSAGE, INVALID_CHAR_MESSAGE } from '../lib/validation.js'
 
 function validatePayload(body) {
@@ -30,11 +31,15 @@ function validatePayload(body) {
 }
 
 export default async function handler(req, res) {
+  const userId = getUserId(req)
+  if (!userId) return res.status(401).json({ error: '認証が必要です' })
+
   const { id } = req.query
 
   if (id === undefined) {
     if (req.method === 'GET') {
       const transactions = await prisma.transaction.findMany({
+        where: { userId },
         orderBy: { date: 'desc' },
       })
       return res.status(200).json(transactions)
@@ -50,6 +55,7 @@ export default async function handler(req, res) {
 
       const transaction = await prisma.transaction.create({
         data: {
+          userId,
           type,
           amount: Math.round(Number(amount)),
           category: category || null,
@@ -79,38 +85,31 @@ export default async function handler(req, res) {
       return res.status(400).json({ errors })
     }
 
-    try {
-      const transaction = await prisma.transaction.update({
-        where: { id: transactionId },
-        data: {
-          type,
-          amount: Math.round(Number(amount)),
-          category: category || null,
-          memo: memo || null,
-          date: date ? new Date(date) : new Date(),
-          paymentMethod: isCredit ? 'credit' : 'cash',
-          creditCardId: isCredit ? Number(req.body.creditCardId) : null,
-        },
-      })
-      return res.status(200).json(transaction)
-    } catch (err) {
-      if (err.code === 'P2025') {
-        return res.status(404).json({ error: '取引が見つかりません' })
-      }
-      throw err
+    const result = await prisma.transaction.updateMany({
+      where: { id: transactionId, userId },
+      data: {
+        type,
+        amount: Math.round(Number(amount)),
+        category: category || null,
+        memo: memo || null,
+        date: date ? new Date(date) : new Date(),
+        paymentMethod: isCredit ? 'credit' : 'cash',
+        creditCardId: isCredit ? Number(req.body.creditCardId) : null,
+      },
+    })
+    if (result.count === 0) {
+      return res.status(404).json({ error: '取引が見つかりません' })
     }
+    const transaction = await prisma.transaction.findUnique({ where: { id: transactionId } })
+    return res.status(200).json(transaction)
   }
 
   if (req.method === 'DELETE') {
-    try {
-      await prisma.transaction.delete({ where: { id: transactionId } })
-      return res.status(204).end()
-    } catch (err) {
-      if (err.code === 'P2025') {
-        return res.status(404).json({ error: '取引が見つかりません' })
-      }
-      throw err
+    const result = await prisma.transaction.deleteMany({ where: { id: transactionId, userId } })
+    if (result.count === 0) {
+      return res.status(404).json({ error: '取引が見つかりません' })
     }
+    return res.status(204).end()
   }
 
   res.setHeader('Allow', ['PUT', 'DELETE'])

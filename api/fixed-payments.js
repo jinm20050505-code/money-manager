@@ -1,12 +1,19 @@
 import { prisma } from '../lib/prisma.js'
+import { getUserId } from '../lib/auth.js'
 import { isBlank, hasInvalidChars, REQUIRED_MESSAGE, INVALID_CHAR_MESSAGE } from '../lib/validation.js'
 
 export default async function handler(req, res) {
+  const userId = getUserId(req)
+  if (!userId) return res.status(401).json({ error: '認証が必要です' })
+
   const { id } = req.query
 
   if (id === undefined) {
     if (req.method === 'GET') {
-      const payments = await prisma.fixedPayment.findMany({ orderBy: { createdAt: 'asc' } })
+      const payments = await prisma.fixedPayment.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'asc' },
+      })
       return res.status(200).json(payments)
     }
 
@@ -39,6 +46,7 @@ export default async function handler(req, res) {
 
       const payment = await prisma.fixedPayment.create({
         data: {
+          userId,
           name,
           amount: Math.round(Number(amount)),
           type: type === 'income' ? 'income' : 'expense',
@@ -59,15 +67,11 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'DELETE') {
-    try {
-      await prisma.fixedPayment.delete({ where: { id: paymentId } })
-      return res.status(204).end()
-    } catch (err) {
-      if (err.code === 'P2025') {
-        return res.status(404).json({ error: '固定費が見つかりません' })
-      }
-      throw err
+    const result = await prisma.fixedPayment.deleteMany({ where: { id: paymentId, userId } })
+    if (result.count === 0) {
+      return res.status(404).json({ error: '固定費が見つかりません' })
     }
+    return res.status(204).end()
   }
 
   res.setHeader('Allow', ['DELETE'])

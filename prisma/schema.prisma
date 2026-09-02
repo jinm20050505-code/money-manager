@@ -7,8 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                Int                @id @default(autoincrement())
+  email             String             @unique
+  passwordHash      String
+  createdAt         DateTime           @default(now())
+  profile           Profile?
+  transactions      Transaction[]
+  fixedPayments     FixedPayment[]
+  budgets           Budget[]
+  loans             Loan[]
+  creditCards       CreditCard[]
+  savingsGoal       SavingsGoal?
+  pushSubscriptions PushSubscription[]
+}
+
 model Transaction {
   id            Int         @id @default(autoincrement())
+  userId        Int?
+  user          User?       @relation(fields: [userId], references: [id])
   type          String
   amount        Int
   category      String?
@@ -22,6 +39,8 @@ model Transaction {
 
 model CreditCard {
   id           Int           @id @default(autoincrement())
+  userId       Int?
+  user         User?         @relation(fields: [userId], references: [id])
   name         String
   paymentDay   Int
   createdAt    DateTime      @default(now())
@@ -30,6 +49,8 @@ model CreditCard {
 
 model Profile {
   id         Int      @id @default(autoincrement())
+  userId     Int?     @unique
+  user       User?    @relation(fields: [userId], references: [id])
   name       String
   age        Int
   occupation String
@@ -39,6 +60,8 @@ model Profile {
 
 model FixedPayment {
   id         Int      @id @default(autoincrement())
+  userId     Int?
+  user       User?    @relation(fields: [userId], references: [id])
   name       String
   amount     Int
   type       String   @default("expense")
@@ -49,18 +72,26 @@ model FixedPayment {
 
 model Budget {
   id       Int    @id @default(autoincrement())
-  category String @unique
+  userId   Int?
+  user     User?  @relation(fields: [userId], references: [id])
+  category String
   limit    Int
+
+  @@unique([userId, category])
 }
 
 model SavingsGoal {
   id        Int      @id @default(autoincrement())
+  userId    Int?     @unique
+  user      User?    @relation(fields: [userId], references: [id])
   amount    Int
   updatedAt DateTime @updatedAt
 }
 
 model PushSubscription {
   id        Int      @id @default(autoincrement())
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
   endpoint  String   @unique
   p256dh    String
   auth      String
@@ -69,6 +100,8 @@ model PushSubscription {
 
 model Loan {
   id                 Int           @id @default(autoincrement())
+  userId             Int?
+  user               User?         @relation(fields: [userId], references: [id])
   amount             Int
   lender             String
   dueDate            DateTime?
