@@ -195,6 +195,27 @@ body {
   cursor: pointer;
 }
 
+.password-change {
+  border-top: 1px solid #f1f3f5;
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.password-change h3 {
+  font-size: 0.9rem;
+  margin: 0 0 10px;
+}
+
+.password-change .auth-form {
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.password-change .auth-form button[type='submit'] {
+  padding: 10px;
+  font-size: 0.9rem;
+}
+
 .auth-card {
   background: #fff;
   border-radius: 12px;

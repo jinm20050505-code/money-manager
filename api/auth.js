@@ -104,6 +104,40 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true })
   }
 
+  if (action === 'change-password') {
+    if (req.method !== 'POST') {
+      res.setHeader('Allow', ['POST'])
+      return res.status(405).end(`Method ${req.method} Not Allowed`)
+    }
+
+    const userId = getUserId(req)
+    if (!userId) return res.status(401).json({ error: '認証が必要です' })
+
+    const { currentPassword, newPassword } = req.body ?? {}
+    const errors = {}
+
+    if (isBlank(currentPassword)) errors.currentPassword = REQUIRED_MESSAGE
+
+    if (isBlank(newPassword)) errors.newPassword = REQUIRED_MESSAGE
+    else if (newPassword.length < 8) errors.newPassword = '8文字以上で入力してください'
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ errors })
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } })
+    if (!user || !verifyPassword(currentPassword, user.passwordHash)) {
+      return res.status(401).json({ errors: { currentPassword: '現在のパスワードが違います' } })
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: hashPassword(newPassword) },
+    })
+
+    return res.status(200).json({ ok: true })
+  }
+
   if (action === 'me') {
     if (req.method !== 'GET') {
       res.setHeader('Allow', ['GET'])

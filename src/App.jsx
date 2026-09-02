@@ -3,6 +3,7 @@ import AboutSection from './components/AboutSection.jsx'
 import AuthScreen from './components/AuthScreen.jsx'
 import BudgetSection from './components/BudgetSection.jsx'
 import CalendarView from './components/CalendarView.jsx'
+import ChangePasswordForm from './components/ChangePasswordForm.jsx'
 import CreditCardSection from './components/CreditCardSection.jsx'
 import DailyAllowance from './components/DailyAllowance.jsx'
 import FixedPaymentSection from './components/FixedPaymentSection.jsx'
@@ -247,6 +248,9 @@ export default function App() {
           <section className="account-section">
             <h2>アカウント</h2>
             <p className="share-hint">{user.email} でログイン中</p>
+
+            <ChangePasswordForm />
+
             <button type="button" className="logout-button" onClick={handleLogout}>
               ログアウト
             </button>
