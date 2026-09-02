@@ -58,7 +58,7 @@ export default function FixedPaymentSection({ payments, onChanged }) {
   }
 
   async function handleDelete(id) {
-    await fetch(`/api/fixed-payments/${id}`, { method: 'DELETE' })
+    await fetch(`/api/fixed-payments?id=${id}`, { method: 'DELETE' })
     onChanged?.()
   }
 

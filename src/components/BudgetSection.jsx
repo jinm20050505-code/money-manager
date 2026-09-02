@@ -62,7 +62,7 @@ export default function BudgetSection({ transactions }) {
   }
 
   async function handleDelete(category) {
-    await fetch(`/api/budgets/${encodeURIComponent(category)}`, { method: 'DELETE' })
+    await fetch(`/api/budgets?category=${encodeURIComponent(category)}`, { method: 'DELETE' })
     setBudgets((prev) => prev.filter((b) => b.category !== category))
   }
 

@@ -58,7 +58,7 @@ export default function CreditCardSection({ cards, transactions, onChanged }) {
   }
 
   async function handleDelete(id) {
-    await fetch(`/api/credit-cards/${id}`, { method: 'DELETE' })
+    await fetch(`/api/credit-cards?id=${id}`, { method: 'DELETE' })
     onChanged?.()
   }
 

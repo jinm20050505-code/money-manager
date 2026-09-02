@@ -5,45 +5,28 @@ process.on('unhandledRejection', (err) => {
 })
 
 const routes = [
-  { prefix: '/api/transactions', handlerPath: '../api/transactions/[[...id]].js', paramName: 'id' },
-  { prefix: '/api/fixed-payments', handlerPath: '../api/fixed-payments/[[...id]].js', paramName: 'id' },
-  { prefix: '/api/budgets', handlerPath: '../api/budgets/[[...category]].js', paramName: 'category' },
-  { prefix: '/api/credit-cards', handlerPath: '../api/credit-cards/[[...id]].js', paramName: 'id' },
-  { prefix: '/api/loans', handlerPath: '../api/loans/[[...segments]].js', paramName: 'segments' },
-  { prefix: '/api/share', handlerPath: '../api/share/[[...token]].js', paramName: 'token' },
-  { prefix: '/api/profile', handlerPath: '../api/profile.js', paramName: null },
-  { prefix: '/api/push/subscribe', handlerPath: '../api/push/subscribe.js', paramName: null },
-  { prefix: '/api/savings-goal', handlerPath: '../api/savings-goal.js', paramName: null },
-  { prefix: '/api/cron/reminder', handlerPath: '../api/cron/reminder.js', paramName: null },
+  { pattern: '/api/transactions', handlerPath: '../api/transactions.js' },
+  { pattern: '/api/fixed-payments', handlerPath: '../api/fixed-payments.js' },
+  { pattern: '/api/budgets', handlerPath: '../api/budgets.js' },
+  { pattern: '/api/credit-cards', handlerPath: '../api/credit-cards.js' },
+  { pattern: '/api/loans', handlerPath: '../api/loans.js' },
+  { pattern: '/api/share', handlerPath: '../api/share.js' },
+  { pattern: '/api/profile', handlerPath: '../api/profile.js' },
+  { pattern: '/api/push/subscribe', handlerPath: '../api/push/subscribe.js' },
+  { pattern: '/api/savings-goal', handlerPath: '../api/savings-goal.js' },
+  { pattern: '/api/cron/reminder', handlerPath: '../api/cron/reminder.js' },
 ]
-
-function matchRoute(pathname) {
-  for (const route of routes) {
-    if (pathname === route.prefix) return { route, rest: '' }
-    if (pathname.startsWith(`${route.prefix}/`)) {
-      return { route, rest: pathname.slice(route.prefix.length + 1) }
-    }
-  }
-  return null
-}
 
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost')
     const search = Object.fromEntries(url.searchParams.entries())
 
-    const matched = matchRoute(url.pathname)
-    if (!matched) {
+    const route = routes.find((r) => r.pattern === url.pathname)
+    if (!route) {
       res.writeHead(404, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ error: 'not found' }))
       return
-    }
-
-    const { route, rest } = matched
-    const params = {}
-    if (route.paramName) {
-      const segments = rest.split('/').filter(Boolean).map(decodeURIComponent)
-      if (segments.length > 0) params[route.paramName] = segments
     }
 
     let body
@@ -60,7 +43,7 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
-    const mockReq = { method: req.method, query: { ...search, ...params }, body }
+    const mockReq = { method: req.method, query: search, body }
     const mockRes = {
       statusCode: 200,
       _headers: {},

@@ -1,5 +1,5 @@
-import { prisma } from '../../lib/prisma.js'
-import { isBlank, hasInvalidChars, REQUIRED_MESSAGE, INVALID_CHAR_MESSAGE } from '../../lib/validation.js'
+import { prisma } from '../lib/prisma.js'
+import { isBlank, hasInvalidChars, REQUIRED_MESSAGE, INVALID_CHAR_MESSAGE } from '../lib/validation.js'
 
 function validatePayload(body) {
   const { type, amount, category, memo, paymentMethod, creditCardId } = body ?? {}
@@ -30,8 +30,7 @@ function validatePayload(body) {
 }
 
 export default async function handler(req, res) {
-  const segments = req.query.id ?? []
-  const id = segments[0]
+  const { id } = req.query
 
   if (id === undefined) {
     if (req.method === 'GET') {

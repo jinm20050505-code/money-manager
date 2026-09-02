@@ -1,9 +1,8 @@
-import { prisma } from '../../lib/prisma.js'
-import { isBlank, hasInvalidChars, REQUIRED_MESSAGE, INVALID_CHAR_MESSAGE } from '../../lib/validation.js'
+import { prisma } from '../lib/prisma.js'
+import { isBlank, hasInvalidChars, REQUIRED_MESSAGE, INVALID_CHAR_MESSAGE } from '../lib/validation.js'
 
 export default async function handler(req, res) {
-  const segments = req.query.category ?? []
-  const category = segments[0]
+  const { category } = req.query
 
   if (category === undefined) {
     if (req.method === 'GET') {

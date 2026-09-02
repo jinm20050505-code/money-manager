@@ -1,13 +1,12 @@
-import { prisma } from '../../lib/prisma.js'
-import { isBlank, hasInvalidChars, REQUIRED_MESSAGE, INVALID_CHAR_MESSAGE } from '../../lib/validation.js'
+import { prisma } from '../lib/prisma.js'
+import { isBlank, hasInvalidChars, REQUIRED_MESSAGE, INVALID_CHAR_MESSAGE } from '../lib/validation.js'
 
 const VALID_FREQUENCIES = ['daily', 'weekly', 'monthly']
 
 export default async function handler(req, res) {
-  const segments = req.query.segments ?? []
-  const [idSegment, subResource] = segments
+  const { id, resource } = req.query
 
-  if (idSegment === undefined) {
+  if (id === undefined) {
     if (req.method === 'GET') {
       const loans = await prisma.loan.findMany({
         include: { payments: true },
@@ -63,12 +62,12 @@ export default async function handler(req, res) {
     return res.status(405).end(`Method ${req.method} Not Allowed`)
   }
 
-  const loanId = Number(idSegment)
+  const loanId = Number(id)
   if (!Number.isInteger(loanId)) {
     return res.status(400).json({ error: '不正なIDです' })
   }
 
-  if (subResource === 'payments') {
+  if (resource === 'payments') {
     if (req.method === 'GET') {
       const payments = await prisma.loanPayment.findMany({
         where: { loanId },

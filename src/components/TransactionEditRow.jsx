@@ -48,7 +48,7 @@ export default function TransactionEditRow({ transaction, creditCards, onSaved, 
 
     setSubmitting(true)
     try {
-      const res = await fetch(`/api/transactions/${transaction.id}`, {
+      const res = await fetch(`/api/transactions?id=${transaction.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

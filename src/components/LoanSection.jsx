@@ -70,7 +70,7 @@ export default function LoanSection({ loans, onChanged }) {
   }
 
   async function toggleRepaid(loan) {
-    await fetch(`/api/loans/${loan.id}`, {
+    await fetch(`/api/loans?id=${loan.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ repaid: !loan.repaid }),
@@ -79,7 +79,7 @@ export default function LoanSection({ loans, onChanged }) {
   }
 
   async function recordPayment(loan) {
-    await fetch(`/api/loans/${loan.id}/payments`, {
+    await fetch(`/api/loans?id=${loan.id}&resource=payments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount: loan.repaymentAmount }),
@@ -88,7 +88,7 @@ export default function LoanSection({ loans, onChanged }) {
   }
 
   async function handleDelete(id) {
-    await fetch(`/api/loans/${id}`, { method: 'DELETE' })
+    await fetch(`/api/loans?id=${id}`, { method: 'DELETE' })
     onChanged?.()
   }
 

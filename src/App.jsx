@@ -91,7 +91,7 @@ export default function App() {
   async function handleDelete(id) {
     setError(null)
     try {
-      const res = await fetch(`/api/transactions/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/transactions?id=${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('削除に失敗しました')
       setTransactions((prev) => prev.filter((t) => t.id !== id))
     } catch (err) {

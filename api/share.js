@@ -1,9 +1,8 @@
 import { randomUUID } from 'crypto'
-import { prisma } from '../../lib/prisma.js'
+import { prisma } from '../lib/prisma.js'
 
 export default async function handler(req, res) {
-  const segments = req.query.token ?? []
-  const token = segments[0]
+  const { token } = req.query
 
   if (token === undefined) {
     if (req.method !== 'POST') {

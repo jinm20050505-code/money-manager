@@ -8,7 +8,7 @@ export default function SharedView({ token }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`/api/share/${token}`)
+    fetch(`/api/share?token=${encodeURIComponent(token)}`)
       .then(async (res) => {
         const body = await res.json()
         if (!res.ok) throw new Error(body.error || '共有データの取得に失敗しました')
