@@ -5,50 +5,46 @@ process.on('unhandledRejection', (err) => {
 })
 
 const routes = [
-  { pattern: /^\/api\/transactions\/?$/, handlerPath: '../api/transactions.js', params: [] },
-  { pattern: /^\/api\/transactions\/([^/]+)\/?$/, handlerPath: '../api/transactions/[id].js', params: ['id'] },
-  { pattern: /^\/api\/profile\/?$/, handlerPath: '../api/profile.js', params: [] },
-  { pattern: /^\/api\/share\/?$/, handlerPath: '../api/share.js', params: [] },
-  { pattern: /^\/api\/share\/([^/]+)\/?$/, handlerPath: '../api/share/[token].js', params: ['token'] },
-  { pattern: /^\/api\/fixed-payments\/?$/, handlerPath: '../api/fixed-payments.js', params: [] },
-  { pattern: /^\/api\/fixed-payments\/([^/]+)\/?$/, handlerPath: '../api/fixed-payments/[id].js', params: ['id'] },
-  { pattern: /^\/api\/budgets\/?$/, handlerPath: '../api/budgets.js', params: [] },
-  { pattern: /^\/api\/budgets\/([^/]+)\/?$/, handlerPath: '../api/budgets/[category].js', params: ['category'] },
-  { pattern: /^\/api\/push\/subscribe\/?$/, handlerPath: '../api/push/subscribe.js', params: [] },
-  { pattern: /^\/api\/cron\/reminder\/?$/, handlerPath: '../api/cron/reminder.js', params: [] },
-  { pattern: /^\/api\/loans\/?$/, handlerPath: '../api/loans.js', params: [] },
-  {
-    pattern: /^\/api\/loans\/([^/]+)\/payments\/?$/,
-    handlerPath: '../api/loans/[id]/payments.js',
-    params: ['id'],
-  },
-  { pattern: /^\/api\/loans\/([^/]+)\/?$/, handlerPath: '../api/loans/[id].js', params: ['id'] },
-  { pattern: /^\/api\/credit-cards\/?$/, handlerPath: '../api/credit-cards.js', params: [] },
-  {
-    pattern: /^\/api\/credit-cards\/([^/]+)\/?$/,
-    handlerPath: '../api/credit-cards/[id].js',
-    params: ['id'],
-  },
-  { pattern: /^\/api\/savings-goal\/?$/, handlerPath: '../api/savings-goal.js', params: [] },
+  { prefix: '/api/transactions', handlerPath: '../api/transactions/[[...id]].js', paramName: 'id' },
+  { prefix: '/api/fixed-payments', handlerPath: '../api/fixed-payments/[[...id]].js', paramName: 'id' },
+  { prefix: '/api/budgets', handlerPath: '../api/budgets/[[...category]].js', paramName: 'category' },
+  { prefix: '/api/credit-cards', handlerPath: '../api/credit-cards/[[...id]].js', paramName: 'id' },
+  { prefix: '/api/loans', handlerPath: '../api/loans/[[...segments]].js', paramName: 'segments' },
+  { prefix: '/api/share', handlerPath: '../api/share/[[...token]].js', paramName: 'token' },
+  { prefix: '/api/profile', handlerPath: '../api/profile.js', paramName: null },
+  { prefix: '/api/push/subscribe', handlerPath: '../api/push/subscribe.js', paramName: null },
+  { prefix: '/api/savings-goal', handlerPath: '../api/savings-goal.js', paramName: null },
+  { prefix: '/api/cron/reminder', handlerPath: '../api/cron/reminder.js', paramName: null },
 ]
+
+function matchRoute(pathname) {
+  for (const route of routes) {
+    if (pathname === route.prefix) return { route, rest: '' }
+    if (pathname.startsWith(`${route.prefix}/`)) {
+      return { route, rest: pathname.slice(route.prefix.length + 1) }
+    }
+  }
+  return null
+}
 
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost')
     const search = Object.fromEntries(url.searchParams.entries())
 
-    const route = routes.find((r) => r.pattern.test(url.pathname))
-    if (!route) {
+    const matched = matchRoute(url.pathname)
+    if (!matched) {
       res.writeHead(404, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ error: 'not found' }))
       return
     }
 
-    const match = route.pattern.exec(url.pathname)
+    const { route, rest } = matched
     const params = {}
-    route.params.forEach((name, i) => {
-      params[name] = decodeURIComponent(match[i + 1])
-    })
+    if (route.paramName) {
+      const segments = rest.split('/').filter(Boolean).map(decodeURIComponent)
+      if (segments.length > 0) params[route.paramName] = segments
+    }
 
     let body
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
